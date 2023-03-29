@@ -7,6 +7,7 @@ public class Main {
 
     private static String playerName;
     private static int gold;
+    private static int bank;
     private static long currentSteps = 0;
     public static void main(String[] args) {
         Scanner namePick = new Scanner(System.in);
@@ -39,15 +40,16 @@ public class Main {
     public static void start() {
         Timer steps = new Timer();
         steps.schedule(new TimerTask() {
-            @Override
+
             public void run() {
                 currentSteps += 1;
+                // move the selector up
                 System.out.print("\033[1A");
-                // clear line
+//                System.out.print(String.format("\003[2J"));
+                // clear line         not working
                 System.out.print("\033[2K");
                 // print new text
                 System.out.println("Current Steps: " + currentSteps);
-
 
                 Random randomNum = new Random();
 
@@ -56,32 +58,89 @@ public class Main {
 //              return random;
                 if (currentSteps % 2 == 1 && currentSteps > 5) {// even or above 5
 //                    if (currentSteps == 1) {// quick tester
-                    if (random == 1 || random % 3 == 0) {
+                    if (random % 4 == 0) {
 //                    if (true) { //quick tester
                         steps.cancel();
-                        Main main = new Main();
-                        main.battleStart();
+                        Main attackChance = new Main();
+                        attackChance.battleStart();
                     }
                 } else if (currentSteps % 2 == 0 && currentSteps > 5) { //odd or above 5
-                    if (random % 4 == 0 && currentSteps > 5) {
+                    if (random % 3 == 0 && currentSteps > 2) {
                       steps.cancel();
-                      Main main = new Main();
-                      main.eventStarter();
+                      Main eventChance = new Main();
+                        eventChance.eventStarter();
                     }
                 }
             }
         }, 0, 1000);
     }
 
-    int banditHP = 20;
+
+    public static void goHome() {
+        Timer steps = new Timer();
+        steps.schedule(new TimerTask() {
+
+            public void run() {
+                currentSteps -= 1;
+
+                // move the selector up
+                System.out.print("\033[1A");
+//                System.out.print(String.format("\003[2J"));
+                // clear line         not working
+                System.out.print("\033[2K");
+                // print new text
+                System.out.println("Current Steps: " + currentSteps);
+
+                Random randomNum = new Random();
+
+                int random = randomNum.nextInt(10) + 1;
+//                System.out.println(random); // random number tester
+//              return random;
+
+
+                if (currentSteps == 0) {
+                    steps.cancel();
+                    System.out.println("You have returned to Town.");
+                    // new method call here to navigate village and talk to mayor
+                    Main home = new Main();
+                    home.mayorTalk();
+                }
+                else if (currentSteps % 2 == 1 && currentSteps > 5) {// even or above 5
+//                    if (currentSteps == 1) {// quick tester
+                    if (random % 4 == 0) {
+//                    if (true) { //quick tester
+                        steps.cancel();
+                        Main attackChance = new Main();
+                        attackChance.battleStart();
+                    }
+                } else if (currentSteps % 2 == 0 && currentSteps > 5) { //odd or above 5
+                    if (random % 3 == 0 && currentSteps > 2) {
+                        steps.cancel();
+                        Main eventChance = new Main();
+                        eventChance.eventStarter();
+                    }
+                }
+            }
+        }, 0, 1000);
+    }
+    int banditHP = 10;
     int banditLevel = 1;
     int banditOffLevel = 1;
     int banditDefLevel = 1;
 
 
-
+    public static int playerEXP = 0;
+    public void levelUp() {
+        if (playerEXP == 100) {
+            playerLevel += 1;
+            System.out.println("You Leveled Up.");
+            System.out.println("You are Level " + playerLevel + "!");
+            playerEXP = 0;
+            playerHP = 20;
+        }
+    }
     private static int playerHP = 20;
-    int playerLevel = 3;
+    private static int playerLevel = 3;
     int playerOffLevel = 1;
     int playerDefLevel = 1;
     public void battleStart() {
@@ -98,7 +157,7 @@ public class Main {
 
 
     public void battleAttack() {
-        System.out.println("\nType \"Attack\" to Roll Your Dice for the Attack.");
+        System.out.println("\nType \"Attack\" to Roll Your Dice for the Attack.\nType in \"run\" to try to run away.");
         Scanner roll = new Scanner(System.in);
         String rollValidate = roll.nextLine();
 
@@ -123,23 +182,21 @@ public class Main {
                 System.out.println("Bandit: Ouch!");
 
 
-
                 System.out.printf("\t\t\t\t\t\t%-15s\t\t\t\t\t\t%-15s", "Bandit Level: " + banditLevel, playerName + " Level: " + playerLevel);
                 System.out.printf("\n\t\t\t\t\t\t%-15s\t\t\t\t\t%-15s", "Bandit Health: " + banditHP, playerName + " Health: " + playerHP);
                 System.out.printf("\n\t\t\t\t\t\t%-15s\t\t\t\t%-15s", "Bandit Offensive LvL: " + banditOffLevel, playerName + " Offensive LvL: " + playerOffLevel);
                 System.out.printf("\n\t\t\t\t\t\t%-15s\t\t\t\t%-15s", "Bandit Defensive LvL: " + banditDefLevel, playerName + " Defensive LvL: " + playerDefLevel);
 
 
-
                 if (banditHP <= 0) {
                     System.out.println("\nBandit:  NO! HOW COULD I DIE!?");
                     System.out.println("Bandit was defeated!");
+                    System.out.println("You Gained 100XP!");
+                    playerEXP += 100;
                     banditHP = 20;
-
-
+                    levelUp();
                     // xp gold and items gained here
-
-                    start();
+                    remote();
 
                 } else if (banditHP > 0) {
                     battleDefend();
@@ -148,6 +205,17 @@ public class Main {
             } else {
                 System.out.println("Bandit Blocked ALL damage.");
                 System.out.println("Bandit: HA! What was that?.");
+                battleDefend();
+            }
+        } else if (rollValidate.equalsIgnoreCase("run")) {
+            Random randomRun = new Random();
+            int runAway = randomRun.nextInt(4) + 1;// +5
+            System.out.println(runAway);
+            if (runAway < 2) {
+                System.out.println("You ran away safely.");
+                remote();
+            } else {
+                System.out.println("where do you think your going?");
                 battleDefend();
             }
         } else {
@@ -222,6 +290,9 @@ public class Main {
     }
 
     public void eventStarter() {
+
+
+
         System.out.println("Special Event Found");
         // gold----items-----health/ health potions
         int eventRandom = (int)(Math.random() * 10) + 1;
@@ -233,13 +304,15 @@ public class Main {
                         System.out.println("You found 50 gold.");
                         System.out.println("Gold Total: " + gold);
 
-                        start();
+
+                        remote();
+
                     } else {
                         gold = gold + 100;
                         System.out.println("You found 100 gold.");
                         System.out.println("Gold Total: " + gold);
 
-                        start();
+                        remote();
                     }
 
             } else {
@@ -247,12 +320,44 @@ public class Main {
                 if(playerHP < 20) {
                     playerHP += 20;
                     System.out.println("You are now max on health.");
-                    start();
+
+                    remote();
+
                 } else {
                     System.out.println("You are already max on health.");
-                    start();
+                    remote();
+
                 }
             }
     }
 
+
+
+    public void remote() {
+        System.out.println("Enter in \"c\" to continue your journey. \nEnter in \"home\" to return the the town.");
+
+        Scanner remote = new Scanner(System.in);
+        String playerResume = remote.nextLine();
+        if (playerResume.equalsIgnoreCase("c")) {
+            start();
+        } else if (playerResume.equals("home")) {
+            System.out.println("You are returning Home.");
+            goHome();
+        } else {
+            remote();
+        }
+    }
+
+
+    public void mayorTalk() {
+        System.out.println("Mayor: Welcome Back " + playerName + ", I hope Your adventure was good.");
+        System.out.println("Mayor: You came back with " + gold);
+        System.out.println("Mayor: Your Bank Total was: " + bank);
+        bank += gold;
+        gold = 0;
+        System.out.println("Mayor: Your Bank Total is now: " + bank);
+
+        greetings();
+
+    }
 }
