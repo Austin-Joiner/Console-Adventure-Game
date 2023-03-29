@@ -5,10 +5,11 @@ import java.util.Random;
 
 public class Main {
 
-    private static String playerName;
-    private static int gold;
-    private static int bank;
-    private static long currentSteps = 0;
+    public static String playerName;
+    public static int gold;
+    public static int bank;
+    public static long currentSteps = 0;
+
     public static void main(String[] args) {
         Scanner namePick = new Scanner(System.in);
         System.out.println("Mayor: Hello Adventurer! Im the Town Mayor! I am here to help you out.");
@@ -42,21 +43,22 @@ public class Main {
         steps.schedule(new TimerTask() {
 
             public void run() {
+
                 currentSteps += 1;
-                // move the selector up
-                System.out.print("\033[1A");
-//                System.out.print(String.format("\003[2J"));
-                // clear line         not working
-                System.out.print("\033[2K");
-                // print new text
-                System.out.println("Current Steps: " + currentSteps);
+
+                System.out.print("\rCurrent Steps: " + currentSteps);
+
+                if(currentSteps % 5 == 0) {
+                    playerEXP += 3;
+
+                }
 
                 Random randomNum = new Random();
 
                 int random = randomNum.nextInt(10) + 1;
-//                System.out.println(random); // random number tester
-//              return random;
+
                 if (currentSteps % 2 == 1 && currentSteps > 5) {// even or above 5
+
 //                    if (currentSteps == 1) {// quick tester
                     if (random % 4 == 0) {
 //                    if (true) { //quick tester
@@ -83,13 +85,7 @@ public class Main {
             public void run() {
                 currentSteps -= 1;
 
-                // move the selector up
-                System.out.print("\033[1A");
-//                System.out.print(String.format("\003[2J"));
-                // clear line         not working
-                System.out.print("\033[2K");
-                // print new text
-                System.out.println("Current Steps: " + currentSteps);
+                System.out.print("\rCurrent Steps: " + currentSteps);
 
                 Random randomNum = new Random();
 
@@ -100,7 +96,7 @@ public class Main {
 
                 if (currentSteps == 0) {
                     steps.cancel();
-                    System.out.println("You have returned to Town.");
+                    System.out.println("\nYou have returned to Town.");
                     // new method call here to navigate village and talk to mayor
                     Main home = new Main();
                     home.mayorTalk();
@@ -131,7 +127,7 @@ public class Main {
 
     public static int playerEXP = 0;
     public void levelUp() {
-        if (playerEXP == 100) {
+        if (playerEXP >= 100) {
             playerLevel += 1;
             System.out.println("You Leveled Up.");
             System.out.println("You are Level " + playerLevel + "!");
@@ -139,12 +135,12 @@ public class Main {
             playerHP = 20;
         }
     }
-    private static int playerHP = 20;
-    private static int playerLevel = 3;
+    public static int playerHP = 20;
+    public static int playerLevel = 3;
     int playerOffLevel = 1;
     int playerDefLevel = 1;
     public void battleStart() {
-        System.out.println("Bandit: Lets Battle scumbag.");
+        System.out.println("\nBandit: Lets Battle scumbag.");
 
         System.out.printf("\t\t\t\t\t\t%-15s\t\t\t\t\t\t%-15s", "Bandit Level: " + banditLevel, playerName + " Level: " + playerLevel);
         System.out.printf("\n\t\t\t\t\t\t%-15s\t\t\t\t\t%-15s", "Bandit Health: " + banditHP, playerName + " Health: " + playerHP);
@@ -293,7 +289,7 @@ public class Main {
 
 
 
-        System.out.println("Special Event Found");
+        System.out.println("\nSpecial Event Found");
         // gold----items-----health/ health potions
         int eventRandom = (int)(Math.random() * 10) + 1;
         int goldRandom = (int)(Math.random() * 10) + 1;
@@ -351,13 +347,33 @@ public class Main {
 
     public void mayorTalk() {
         System.out.println("Mayor: Welcome Back " + playerName + ", I hope Your adventure was good.");
-        System.out.println("Mayor: You came back with " + gold);
+        System.out.println("Mayor: You came back with " + gold + "gold.");
         System.out.println("Mayor: Your Bank Total was: " + bank);
         bank += gold;
         gold = 0;
         System.out.println("Mayor: Your Bank Total is now: " + bank);
 
-        greetings();
+        System.out.println("Mayor: Now I gotta go handle mayor stuff, Enjoy your time in town and get back with me if you want to leave the gates again.");
+
+        System.out.println("1. Mayor\n2. Blacksmith\n3. Armorer\n4. Wizard Shop\n5. Merchant\n6.Town Square");
+
+
+        Scanner townScan = new Scanner(System.in);
+        int townMove = townScan.nextInt();
+        if(townMove == 1) {
+            System.out.println("Mayor: Oh you scared me!");
+            greetings();
+        } else if (townMove == 2) {
+            System.out.println("Blacksmith");
+        } else if (townMove == 3) {
+            System.out.println("Armorer");
+        } else if (townMove == 4) {
+            System.out.println("Wizard Shop");
+        } else if (townMove == 5) {
+            System.out.println("Merchant");
+        } else if (townMove == 6) {
+            System.out.println("Town Square");
+        }
 
     }
 }
